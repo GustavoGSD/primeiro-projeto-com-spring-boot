@@ -1,10 +1,11 @@
 package com.devgustavosdaniel.primeiroprograma.services;
 
-import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.devgustavosdaniel.primeiroprograma.entities.User;
 import com.devgustavosdaniel.primeiroprograma.repositores.UserRepository;
+import com.devgustavosdaniel.primeiroprograma.services.execeptions.DatabaseException;
 import com.devgustavosdaniel.primeiroprograma.services.execeptions.ResourceNotFoundException;
 
 @Service
@@ -45,7 +47,15 @@ public class UserService {
 	}
 	
 	public void delete(Long id) {
-		repository.deleteById(id);
+		
+		try {
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException(id);
+		} catch(DataIntegrityViolationException e) {
+			throw new DatabaseException(e.getMessage());
+		}
+		
 	}
 	
 	public User upDate(Long id, User obj) {
